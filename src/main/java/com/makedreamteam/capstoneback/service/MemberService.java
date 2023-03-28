@@ -4,16 +4,16 @@ import com.makedreamteam.capstoneback.JwtTokenProvider;
 import com.makedreamteam.capstoneback.controller.MemberData;
 import com.makedreamteam.capstoneback.controller.MemberResponseForm;
 import com.makedreamteam.capstoneback.domain.*;
-import com.makedreamteam.capstoneback.exception.CannotFindTeamOrMember;
-import com.makedreamteam.capstoneback.exception.LoginTokenExpiredException;
-import com.makedreamteam.capstoneback.exception.RefreshTokenExpiredException;
-import com.makedreamteam.capstoneback.exception.TokenException;
+import com.makedreamteam.capstoneback.exception.*;
+import com.makedreamteam.capstoneback.form.ResponseForm;
+import com.makedreamteam.capstoneback.form.TeamData;
 import com.makedreamteam.capstoneback.form.checkTokenResponsForm;
 import com.makedreamteam.capstoneback.repository.*;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionSystemException;
@@ -179,15 +179,67 @@ public class MemberService {
 
     }
 
-    public PostMember testAddNewMember(PostMember member,String authToken,String refreshToken) throws RefreshTokenExpiredException, AuthenticationException, LoginTokenExpiredException, TokenException {
+    public ResponseForm testAddNewMember(PostMember member, String authToken, String refreshToken) throws RefreshTokenExpiredException, TokenException, DatabaseException {
 
-        checkTokenResponsForm check = checkUserIdAndToken(authToken, refreshToken);
+        try {
+            // checkTokenResponsForm checkTokenResponsForm = checkUserIdAndToken(authToken, refreshToken);
+            //임시
+            if(jwtTokenProvider.isValidAccessToken(authToken)){//accesstoken 유효
+                //addPost 진행
+                System.out.println("accesstoken이 유효합니다 게시물을 추가합니다.");
+                Claims userinfo= jwtTokenProvider.getClaimsToken(refreshToken);
+                UUID writer=UUID.fromString((String)userinfo.get("userId"));
 
-        List<MemberKeyword> memberKeywords=member.getMemberKeywords();
-        for (MemberKeyword memberKeyword : memberKeywords){
-            memberKeyword.setPostMember(member);
+                Optional<Member> byId = memberRepository.findById(writer);
+                if(byId.isEmpty()){
+                    throw new RuntimeException("사용자가 존재하지 않습니다.");
+                }
+
+                //String newToken = checkTokenResponsForm.getNewToken();
+
+                for (MemberKeyword memberKeyword : member.getMemberKeywords()){
+                    memberKeyword.setPostMember(member);
+                }
+                member.setUserId(writer);
+
+                // post 저장
+                PostMember saved=postMemberRepository.save(member);
+
+
+
+
+                return ResponseForm.builder().state(HttpStatus.OK.value()).message("게시물을 등록했습니다.").data(saved).updatable(true).build();
+            }else{//accesstoken 만료
+                if(jwtTokenProvider.isValidRefreshToken(refreshToken)){//refreshtoken 유효성검사
+                    //refreshtoken db 검사
+                    System.out.println("accesstoken이 만료되었습니다");
+                    System.out.println("refreshtoken 유효성 검사를 시작합니다");
+                    Claims userinfo= jwtTokenProvider.getClaimsToken(refreshToken);
+                    UUID userId=UUID.fromString((String)userinfo.get("userId"));
+                    Optional<RefreshToken> optionalRefreshToken = refreshTokenRepository.findById(userId);
+                    if(optionalRefreshToken.isPresent()){
+                        //db에 존재하므로 access토큰 재발급 문자 출력
+                        System.out.println("accseetoken 재발급이 필요합니다.");
+                        return ResponseForm.builder().message("LonginToken 재발급이 필요합니다.").build();
+                    }
+                    else{
+                        //db에 없는 토큰이므로 오류메시지 출력
+                        System.out.println("허용되지 않은 refreshtoken 입니다");
+                        return ResponseForm.builder().message("허용되지 않은 RefreshToken 입니다").build();
+                    }
+                }
+                else{
+                    // 다시 login 시도
+                    System.out.println("refreshtoken이 만료되었습니다, 다시 로그인 해주세요");
+                    return ResponseForm.builder().message("RefreshToken 이 만료되었습니다, 다시 로그인 해주세요").build();
+                }
+            }
+
+        } catch (DataIntegrityViolationException | JpaSystemException | TransactionSystemException e) {
+            throw new DatabaseException("데이터베이스 처리 중 오류가 발생했습니다.");
+        } catch (JwtException ex) {
+            throw new TokenException(ex.getMessage());
         }
-        return postMemberRepository.save(member);
     }
 
 

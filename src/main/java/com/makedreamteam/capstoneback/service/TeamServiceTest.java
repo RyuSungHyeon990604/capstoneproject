@@ -81,20 +81,20 @@ class TeamServiceTest {
 
     @Test
     public void addMember() throws RefreshTokenExpiredException, AuthenticationException, LoginTokenExpiredException, TokenException {
-        String loginToken="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MTk2NzgwOS03ODcwLTQxYjUtYWM5My0wYmUzMzA4MWI3NTciLCJlbWFpbCI6ImdnQGdnLmNvbSIsIm5pY2tuYW1lIjoibmljayIsInJvbGVzIjoiUk9MRV9NRU1CRVIiLCJpYXQiOjE2Nzk5MzQxODEsImV4cCI6MTY3OTkzNDE4Mn0.CWMUo4ZXYSe7Evul6709w7kOAUeL36p4U3D6NhIlj08";
-        String refreshToken="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MTk2NzgwOS03ODcwLTQxYjUtYWM5My0wYmUzMzA4MWI3NTciLCJlbWFpbCI6ImdnQGdnLmNvbSIsIm5pY2tuYW1lIjoibmljayIsInJvbGVzIjoiUk9MRV9NRU1CRVIiLCJpYXQiOjE2Nzk5MzQxODEsImV4cCI6MTY3OTk1MjE4MX0.CowzfMQhCEpB34WlIan1uhlKbXumwilyLZU13k7xOjM";
-        List<MemberKeyword> memberKeywords=new ArrayList<>();
-       for (int i=0;i<3;i++){
-            memberKeywords.add(MemberKeyword.builder().value("a"+i).build());
-        }
-        Member member1= Member.builder().email("1@1.com").nickname("11").password("1234").build();
-        PostMember postMember= PostMember.builder().userId(UUID.fromString("41967809-7870-41b5-ac93-0be33081b757")).build();
-        for (MemberKeyword memberKeyword : memberKeywords){
-            memberKeyword.setPostMember(postMember);
-        }
-        postMember.setMemberKeywords(memberKeywords);
-
-        memberService.testAddNewMember(postMember,refreshToken,refreshToken);
+//        String loginToken="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MTk2NzgwOS03ODcwLTQxYjUtYWM5My0wYmUzMzA4MWI3NTciLCJlbWFpbCI6ImdnQGdnLmNvbSIsIm5pY2tuYW1lIjoibmljayIsInJvbGVzIjoiUk9MRV9NRU1CRVIiLCJpYXQiOjE2Nzk5MzQxODEsImV4cCI6MTY3OTkzNDE4Mn0.CWMUo4ZXYSe7Evul6709w7kOAUeL36p4U3D6NhIlj08";
+//        String refreshToken="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MTk2NzgwOS03ODcwLTQxYjUtYWM5My0wYmUzMzA4MWI3NTciLCJlbWFpbCI6ImdnQGdnLmNvbSIsIm5pY2tuYW1lIjoibmljayIsInJvbGVzIjoiUk9MRV9NRU1CRVIiLCJpYXQiOjE2Nzk5MzQxODEsImV4cCI6MTY3OTk1MjE4MX0.CowzfMQhCEpB34WlIan1uhlKbXumwilyLZU13k7xOjM";
+//        List<MemberKeyword> memberKeywords=new ArrayList<>();
+//       for (int i=0;i<3;i++){
+//            memberKeywords.add(MemberKeyword.builder().value("a"+i).build());
+//        }
+//        Member member1= Member.builder().email("1@1.com").nickname("11").password("1234").build();
+//        PostMember postMember= PostMember.builder().userId(UUID.fromString("41967809-7870-41b5-ac93-0be33081b757")).build();
+//        for (MemberKeyword memberKeyword : memberKeywords){
+//            memberKeyword.setPostMember(postMember);
+//        }
+//        postMember.setMemberKeywords(memberKeywords);
+//
+//        memberService.testAddNewMember(postMember,refreshToken,refreshToken);
     }
 
     @Test

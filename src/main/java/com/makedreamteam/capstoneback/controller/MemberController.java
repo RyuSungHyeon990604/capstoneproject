@@ -7,10 +7,7 @@ import java.util.UUID;
 
 import com.makedreamteam.capstoneback.JwtTokenProvider;
 import com.makedreamteam.capstoneback.domain.*;
-import com.makedreamteam.capstoneback.exception.CannotFindTeamOrMember;
-import com.makedreamteam.capstoneback.exception.LoginTokenExpiredException;
-import com.makedreamteam.capstoneback.exception.RefreshTokenExpiredException;
-import com.makedreamteam.capstoneback.exception.TokenException;
+import com.makedreamteam.capstoneback.exception.*;
 import com.makedreamteam.capstoneback.form.ResponseForm;
 import com.makedreamteam.capstoneback.repository.MemberRepository;
 import com.makedreamteam.capstoneback.repository.PostMemberRepository;
@@ -174,21 +171,15 @@ public class MemberController {
         try {
             String loginToken = request.getHeader("login-token");
             String refreshToken=request.getHeader("refresh-token");
-           PostMember postMember1= memberService.testAddNewMember(postMember, loginToken, refreshToken);
-            ResponseForm responseForm=ResponseForm.builder().message("새로운 게시물을 작성했습니다.").data(postMember1).build();
+            ResponseForm responseForm = memberService.testAddNewMember(postMember, loginToken, refreshToken);
             return ResponseEntity.badRequest().body(responseForm);
         } catch (RefreshTokenExpiredException e) {
             ResponseForm responseForm=ResponseForm.builder().message(e.getMessage()).build();
             return ResponseEntity.badRequest().body(responseForm);
-        } catch (AuthenticationException e) {
-            ResponseForm responseForm=ResponseForm.builder().message(e.getMessage()).build();
-            return ResponseEntity.badRequest().body(responseForm);
-        } catch (LoginTokenExpiredException e) {
-            ResponseForm responseForm=ResponseForm.builder().message(e.getMessage()).build();
-            return ResponseEntity.badRequest().body(responseForm);
         } catch (TokenException e) {
-            ResponseForm responseForm=ResponseForm.builder().message(e.getMessage()).build();
-            return ResponseEntity.badRequest().body(responseForm);
+            throw new RuntimeException(e);
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
 
     }
